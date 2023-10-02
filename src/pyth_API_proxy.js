@@ -66,10 +66,12 @@ async function getPrice(symbol) {
 // Implement a function to sign data with your EVM wallet's private key
 async function signData(data, privateKey) {
   // Convert data to bytes and sign it with the private key
-  const dataBytes = ethers.utils.arrayify(ethers.utils.solidityKeccak256(["string", "uint256", "uint256", "uint256" ], data));
+  const dataBytes = ethers.utils.arrayify(ethers.utils.solidityKeccak256(
+    ["string", "uint256", "uint256", "uint256"],
+    [data.symbol, data.price, data.fakeBid, data.fakeAsk]
+  ));
   const wallet = new ethers.Wallet(privateKey);
   const signature = await wallet.signMessage(dataBytes);
   return signature;
 }
-
 
