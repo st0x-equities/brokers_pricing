@@ -1,0 +1,17 @@
+{
+  "name": "brokers_pricing",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "deploy": "wrangler deploy",
+    "start": "wrangler dev"
+  },
+  "devDependencies": {
+    "@solana/web3.js": "^1.9.4"
+  },
+  "dependencies": {
+    "@pythnetwork/client": "^2.19.0",
+    "ethers": "^5.5.5",
+    "wrangler": "^3.0.0"
+  }
+}
