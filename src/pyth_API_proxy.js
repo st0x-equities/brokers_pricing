@@ -29,8 +29,7 @@ async function handleRequest(request) {
 
     // Sign the data with your EVM wallet's private key
     const privateKey = '1c8ee97c2a1c154e55c4362a18a0e0b62e7cbd64b88b42f15742f3e3dc2c1e91'; // Replace with your actual private key
-    const dataToSign = { symbol, price, fakeBid, fakeAsk };
-    const signature = await signData(dataToSign, privateKey);
+    const signature = await signData(symbol, price, fakeBid, fakeAsk, privateKey);
 
     console.log('Signature:', signature); // Log the signature
 
@@ -82,14 +81,18 @@ async function getPrice() {
 }
 
 // Implement a function to sign data with your EVM wallet's private key
-async function signData(data, privateKey) {
+async function signData(symbol, price, fakeBid, fakeAsk, privateKey) {
+  console.log('Symbol:', symbol);
+  console.log('Price:', price);
+  console.log('Fake Bid:', fakeBid);
+  console.log('Fake Ask:', fakeAsk);
+
   // Convert data to bytes and sign it with the private key
   const dataBytes = ethers.utils.arrayify(ethers.utils.solidityKeccak256(
     ["string", "uint256", "uint256", "uint256"], // Use "uint256" for FixedNumber values
-    [data.symbol, FixedNumber.fromValue(data.price [decimals = 18 [format = "ufixed256x18"]]), FixedNumber.fromValue(data.fakeBid [decimals = 18 [format = "ufixed256x18"]]),FixedNumber.fromValue(data.fakeAsk [decimals = 18 [format = "ufixed256x18"]])] // Convert to FixedNumber
+    [symbol, FixedNumber.fromValue(price, { decimals: 18, format: "ufixed256x18" }), FixedNumber.fromValue(fakeBid, { decimals: 18, format: "ufixed256x18" }), FixedNumber.fromValue(fakeAsk, { decimals: 18, format: "ufixed256x18" })]
   ));
 
-  console.log('Data to Sign:', data); // Log the data to sign
   console.log('Data Bytes:', dataBytes); // Log the data bytes for debugging
 
   const wallet = new ethers.Wallet(privateKey);
