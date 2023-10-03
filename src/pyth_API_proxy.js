@@ -2,6 +2,8 @@
 const { Connection } = require('@solana/web3.js');
 const { PriceStatus, PythHttpClient, getPythClusterApiUrl, getPythProgramKeyForCluster, PythCluster } = require('@pythnetwork/client');
 const ethers = require('ethers'); // Import ethers.js for Ethereum-related functionality
+const { FixedNumber } = require('ethers'); // Import FixedNumber from ethers.js
+
 
 const PYTHNET_CLUSTER_NAME = 'pythnet'; // Initialize the constant
 
@@ -67,8 +69,8 @@ async function getPrice(symbol) {
 async function signData(data, privateKey) {
   // Convert data to bytes and sign it with the private key
   const dataBytes = ethers.utils.arrayify(ethers.utils.solidityKeccak256(
-    ["string", "uint256", "uint256", "uint256"],
-    [data.symbol, data.price, data.fakeBid, data.fakeAsk]
+    ["string", "unit256", "unit256", "unit256"], // Use "uint256" for FixedNumber values
+    [data.symbol, FixedNumber.fromValue(data.price [decimals = 18 [format = "ufixed256x18"]]), FixedNumber.fromValue(data.fakeBid [decimals = 18 [format = "ufixed256x18"]]),FixedNumber.fromValue(data.fakeAsk [decimals = 18 [format = "ufixed256x18"]])] // Convert to FixedNumber
   ));
   const wallet = new ethers.Wallet(privateKey);
   const signature = await wallet.signMessage(dataBytes);
