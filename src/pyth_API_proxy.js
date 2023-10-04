@@ -97,7 +97,7 @@ async function signData(symbol, price, fakeBid, fakeAsk, privateKey) {
   const fakeAskParsed = ethers.utils.parseEther(fakeAskString); // Ensure fakeAsk is a string
 
   const dataBytes = ethers.utils.solidityKeccak256(
-    ["string", "uint256", "uint256", "uint256"],
+    ["unit256", "uint256", "uint256", "uint256"],
     [symbol, priceParsed, fakeBidParsed, fakeAskParsed]
   );
 
