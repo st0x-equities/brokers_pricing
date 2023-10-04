@@ -28,29 +28,31 @@ async function handleRequest(request) {
 
     // Sign the data with your EVM wallet's private key
     const privateKey = '1c8ee97c2a1c154e55c4362a18a0e0b62e7cbd64b88b42f15742f3e3dc2c1e91'; // Replace with your actual private key
-    const data = await generateDataBytes(symbol, price, fakeBid, fakeAsk);
-
-    console.log('data', data);
-
-    const symbolHash = data.symbolHash;
-    const priceHash = data.priceHash;
-    const fakeBidHash = data.fakeBidHash;
-    const fakeAskHash = data.fakeAskHash;
+    
+    const symbolHash = await generateSymbolBytes(symbol);
+    const priceHash = await generatePriceBytes(price);
+    const fakeBidHash = await generateFakeBidBytes(fakeBid);
+    const fakeAskHash = await generateFakeAskBytes(fakeAsk);
    
-    const signature = await signData(data, privateKey);
+    const bidSignature = await signBid(fakeBidHash, privateKey);
+    const askSignature = await signAsk(fakeAskHash, privateKey);
 
     console.log('Symbol Hash:', symbolHash); // Log the symbol hash for debugging
     console.log('Price Hash:', priceHash); // Log the price hash for debugging
     console.log('Fake Bid Hash:', fakeBidHash); // Log the fake bid hash for debugging
     console.log('Fake Ask Hash:', fakeAskHash); // Log the fake ask hash for debugging
-    console.log('Signature:', signature); // Log the signature
+    console.log('Signature:', bidSignature); // Log the signature
+    console.log('Signature:', askSignature); // Log the signature
 
     // Create the SignedContextV1Struct
     const SignedContextV1Struct = {
       signer: '0x0124555E401547219fB024aE5F8C5101c6f7Cb24', // Replace with your signer's address
-      signature: signature,
-      context: { symbol: symbolHash, price: priceHash, fakeBid: fakeBidHash, fakeAsk: fakeAskHash,
-      },
+      symbol: symbolHash,
+      price: priceHash,
+      fakeBid: fakeBidHash,
+      bidSignature: bidSignature,
+      fakeAsk: fakeAskHash,
+      askSignature : askSignature,
     };
 
     // Return the SignedContextV1Struct as JSON
@@ -90,25 +92,44 @@ async function getPrice() {
   }
 }
 
-// Implement a function to sign data with your EVM wallet's private key
-async function generateDataBytes(symbol, price, fakeBid, fakeAsk) {
-  // Convert data to bytes
-  const priceParsed = ethers.utils.parseEther(price.toString());
-  const fakeBidParsed = ethers.utils.parseEther(fakeBid.toString());
-  const fakeAskParsed = ethers.utils.parseEther(fakeAsk.toString());
-
+// Function to generate bytes for the symbol
+async function generateSymbolBytes(symbol) {
   const symbolHash = ethers.utils.solidityKeccak256(["string"], [symbol]);
-  const priceHash = ethers.utils.solidityKeccak256(["uint256"], [priceParsed]);
-  const fakeBidHash = ethers.utils.solidityKeccak256(["uint256"], [fakeBidParsed]);
-  const fakeAskHash = ethers.utils.solidityKeccak256(["uint256"], [fakeAskParsed]);
-
-  return symbolHash, priceHash, fakeBidHash, fakeAskHash;
+  return symbolHash;
 }
 
-// Implement a function to sign data with your EVM wallet's private key
-async function signData(dataBytes, privateKey) {
+// Function to generate bytes for the price
+async function generatePriceBytes(price) {
+  const priceParsed = ethers.utils.parseEther(price.toString());
+  const priceHash = ethers.utils.solidityKeccak256(["uint256"], [priceParsed]);
+  return priceHash;
+}
+
+// Function to generate bytes for the fake bid
+async function generateFakeBidBytes(fakeBid) {
+  const fakeBidParsed = ethers.utils.parseEther(fakeBid.toString());
+  const fakeBidHash = ethers.utils.solidityKeccak256(["uint256"], [fakeBidParsed]);
+  return fakeBidHash;
+}
+
+// Function to generate bytes for the fake ask
+async function generateFakeAskBytes(fakeAsk) {
+  const fakeAskParsed = ethers.utils.parseEther(fakeAsk.toString());
+  const fakeAskHash = ethers.utils.solidityKeccak256(["uint256"], [fakeAskParsed]);
+  return fakeAskHash;
+}
+
+// Implement a function to sign fakebid with your EVM wallet's private key
+async function signBid(fakeBid, privateKey) {
   const wallet = new ethers.Wallet(privateKey);
-  const signature = await wallet.signMessage(dataBytes);
+  const signature = await wallet.signMessage(fakeBid);
+  return signature;
+}
+
+// Implement a function to sign fakeask with your EVM wallet's private key
+async function signAsk(fakeAsk, privateKey) {
+  const wallet = new ethers.Wallet(privateKey);
+  const signature = await wallet.signMessage(fakeAsk);
   return signature;
 }
 
