@@ -28,15 +28,29 @@ async function handleRequest(request) {
 
     // Sign the data with your EVM wallet's private key
     const privateKey = '1c8ee97c2a1c154e55c4362a18a0e0b62e7cbd64b88b42f15742f3e3dc2c1e91'; // Replace with your actual private key
-    const signature = await signData(symbol, price, fakeBid, fakeAsk, privateKey);
+    const data = await generateDataBytes(symbol, price, fakeBid, fakeAsk);
 
+    console.log('data', data);
+
+    const symbolHash = data.symbolHash;
+    const priceHash = data.priceHash;
+    const fakeBidHash = data.fakeBidHash;
+    const fakeAskHash = data.fakeAskHash;
+   
+    const signature = await signData(data, privateKey);
+
+    console.log('Symbol Hash:', symbolHash); // Log the symbol hash for debugging
+    console.log('Price Hash:', priceHash); // Log the price hash for debugging
+    console.log('Fake Bid Hash:', fakeBidHash); // Log the fake bid hash for debugging
+    console.log('Fake Ask Hash:', fakeAskHash); // Log the fake ask hash for debugging
     console.log('Signature:', signature); // Log the signature
 
     // Create the SignedContextV1Struct
     const SignedContextV1Struct = {
       signer: '0x0124555E401547219fB024aE5F8C5101c6f7Cb24', // Replace with your signer's address
       signature: signature,
-      context: dataBytes,
+      context: { symbol: symbolHash, price: priceHash, fakeBid: fakeBidHash, fakeAsk: fakeAskHash,
+      },
     };
 
     // Return the SignedContextV1Struct as JSON
@@ -77,37 +91,24 @@ async function getPrice() {
 }
 
 // Implement a function to sign data with your EVM wallet's private key
-async function signData(symbol, price, fakeBid, fakeAsk, privateKey) {
-  console.log('Symbol:', symbol);
-  console.log('Price:', price);
-  console.log('Fake Bid:', fakeBid);
-  console.log('Fake Ask:', fakeAsk);
+async function generateDataBytes(symbol, price, fakeBid, fakeAsk) {
+  // Convert data to bytes
+  const priceParsed = ethers.utils.parseEther(price.toString());
+  const fakeBidParsed = ethers.utils.parseEther(fakeBid.toString());
+  const fakeAskParsed = ethers.utils.parseEther(fakeAsk.toString());
 
-  // Convert datat into string
-  const priceString = String(price); // Ensure price is a string
-  const fakeBidString = String(fakeBid); // Ensure fakeBid is a string
-  const fakeAskString = String(fakeAsk); // Ensure fakeAsk is a string
-  console.log('priceString:', priceString);
-  console.log('fakeBidString:', fakeBidString);
-  console.log('fakeAskString:', fakeAskString);
+  const symbolHash = ethers.utils.solidityKeccak256(["string"], [symbol]);
+  const priceHash = ethers.utils.solidityKeccak256(["uint256"], [priceParsed]);
+  const fakeBidHash = ethers.utils.solidityKeccak256(["uint256"], [fakeBidParsed]);
+  const fakeAskHash = ethers.utils.solidityKeccak256(["uint256"], [fakeAskParsed]);
 
-  // Convert data to bytes and sign it with the private key
-  const priceParsed = ethers.utils.parseEther(priceString); // Ensure price is a string
-  const fakeBidParsed = ethers.utils.parseEther(fakeBidString); // Ensure fakeBid is a string
-  const fakeAskParsed = ethers.utils.parseEther(fakeAskString); // Ensure fakeAsk is a string
+  return symbolHash, priceHash, fakeBidHash, fakeAskHash;
+}
 
-  const dataBytes = ethers.utils.solidityKeccak256(
-    ["unit256", "uint256", "uint256", "uint256"],
-    [symbol, priceParsed, fakeBidParsed, fakeAskParsed]
-  );
-
-  console.log('Data Bytes:', dataBytes); // Log the data bytes for debugging
-
+// Implement a function to sign data with your EVM wallet's private key
+async function signData(dataBytes, privateKey) {
   const wallet = new ethers.Wallet(privateKey);
   const signature = await wallet.signMessage(dataBytes);
-
-  console.log('Signature:', signature); // Log the generated signature
-
   return signature;
 }
 
