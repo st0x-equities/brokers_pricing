@@ -2,7 +2,6 @@
 const { Connection } = require('@solana/web3.js');
 const { PriceStatus, PythHttpClient, getPythClusterApiUrl, getPythProgramKeyForCluster, PythCluster } = require('@pythnetwork/client');
 const ethers = require('ethers'); // Import ethers.js for Ethereum-related functionality
-const { FixedNumber } = require('ethers'); // Import FixedNumber from ethers.js
 
 const PYTHNET_CLUSTER_NAME = 'pythnet'; // Initialize the constant
 const connection = new Connection(getPythClusterApiUrl(PYTHNET_CLUSTER_NAME));
@@ -33,14 +32,11 @@ async function handleRequest(request) {
 
     console.log('Signature:', signature); // Log the signature
 
-    // Include the signature in the response
-    dataToSign.signature = signature;
-
     // Create the SignedContextV1Struct
     const SignedContextV1Struct = {
       signer: '0x0124555E401547219fB024aE5F8C5101c6f7Cb24', // Replace with your signer's address
-      signature,
-      context: [dataToSign.symbol, dataToSign.price, dataToSign.fakeBid, dataToSign.fakeAsk],
+      signature: signature,
+      context: dataBytes,
     };
 
     // Return the SignedContextV1Struct as JSON
@@ -87,11 +83,23 @@ async function signData(symbol, price, fakeBid, fakeAsk, privateKey) {
   console.log('Fake Bid:', fakeBid);
   console.log('Fake Ask:', fakeAsk);
 
+  // Convert datat into string
+  const priceString = String(price); // Ensure price is a string
+  const fakeBidString = String(fakeBid); // Ensure fakeBid is a string
+  const fakeAskString = String(fakeAsk); // Ensure fakeAsk is a string
+  console.log('priceString:', priceString);
+  console.log('fakeBidString:', fakeBidString);
+  console.log('fakeAskString:', fakeAskString);
+
   // Convert data to bytes and sign it with the private key
-  const dataBytes = ethers.utils.arrayify(ethers.utils.solidityKeccak256(
-    ["string", "uint256", "uint256", "uint256"], // Use "uint256" for FixedNumber values
-    [symbol, FixedNumber.fromValue(price, { decimals: 18, format: "ufixed256x18" }), FixedNumber.fromValue(fakeBid, { decimals: 18, format: "ufixed256x18" }), FixedNumber.fromValue(fakeAsk, { decimals: 18, format: "ufixed256x18" })]
-  ));
+  const priceParsed = ethers.utils.parseEther(priceString); // Ensure price is a string
+  const fakeBidParsed = ethers.utils.parseEther(fakeBidString); // Ensure fakeBid is a string
+  const fakeAskParsed = ethers.utils.parseEther(fakeAskString); // Ensure fakeAsk is a string
+
+  const dataBytes = ethers.utils.solidityKeccak256(
+    ["string", "uint256", "uint256", "uint256"],
+    [symbol, priceParsed, fakeBidParsed, fakeAskParsed]
+  );
 
   console.log('Data Bytes:', dataBytes); // Log the data bytes for debugging
 
@@ -102,4 +110,6 @@ async function signData(symbol, price, fakeBid, fakeAsk, privateKey) {
 
   return signature;
 }
+
+
 
