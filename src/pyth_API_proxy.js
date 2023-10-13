@@ -37,7 +37,7 @@ async function handleRequest(request) {
 
     console.log('Inverted:', fakeAskInverted)
     console.log('rounded:',fakeAskInvertedrounded )
-    
+
     //Amount limits
     const AmountBuy = 10;
     const AmountSell = 10 * price;
@@ -60,8 +60,8 @@ async function handleRequest(request) {
 
     const contextBuy = [
       ethers.utils.solidityKeccak256(["address", "address"],[BTC_token_address, USDT_token_address]).toString(),
-      ethers.utils.parseEther(fakeBid.toString()).toString(),
       ethers.utils.parseEther(AmountBuy.toString()).toString(),
+      ethers.utils.parseEther(fakeBid.toString()).toString(),
       BigNumber.from(expiry).toString()
     ]
 
@@ -69,8 +69,8 @@ async function handleRequest(request) {
 
     const contextSell = [
       ethers.utils.solidityKeccak256(["address", "address"],[USDT_token_address, BTC_token_address]).toString(),
-      ethers.utils.parseEther(fakeAskInvertedrounded.toString()).toString(),
       ethers.utils.parseEther(AmountSell.toString()).toString(),
+      ethers.utils.parseEther(fakeAskInvertedrounded.toString()).toString(),
       BigNumber.from(expiry).toString()
     ]
 
