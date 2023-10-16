@@ -51,7 +51,6 @@ async function handleRequest(request) {
 
     // Calculate expiry (current time + 1 minute)
     const now = new Date(); // Get the current date and time
-    const orderhash = Math.floor(now.getTime() / 1000);
     const expiry = Math.floor((now.getTime() + 1 * 60 * 1000) / 1000);
 
     // Sign the data with your EVM wallet's private key
@@ -67,7 +66,7 @@ async function handleRequest(request) {
     if (inputToken === 'USDT' && outputToken === 'BTC') {
       // User wants to swap USDT for BTC (Buy)
       context = [
-        ethers.utils.solidityKeccak256(["address", "address", "address", "uint256"], [ USDT_token_address, BTC_token_address, ob_address, BigNumber.from(orderhash).toString()]).toString(),
+        ethers.utils.solidityKeccak256(["address", "address", "address"], [ USDT_token_address, BTC_token_address, ob_addres]).toString(),
         ethers.utils.parseEther(AmountBuy.toString()).toString(),
         ethers.utils.parseEther(fakeBid.toString()).toString(),
         BigNumber.from(expiry).toString()
@@ -79,7 +78,7 @@ async function handleRequest(request) {
     } else if (inputToken === 'BTC' && outputToken === 'USDT') {
       // User wants to swap BTC for USDT (Sell)
       context = [
-        ethers.utils.solidityKeccak256(["address", "address", "address", "uint256"], [BTC_token_address, USDT_token_address,  ob_address, BigNumber.from(orderhash).toString()]).toString(),
+        ethers.utils.solidityKeccak256(["address", "address", "address"], [BTC_token_address, USDT_token_address, ob_address]).toString(),
         ethers.utils.parseEther(AmountSell.toString()).toString(),
         fakeAskInverted,
         BigNumber.from(expiry).toString()
