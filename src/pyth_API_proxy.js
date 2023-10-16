@@ -27,17 +27,10 @@ async function handleRequest(request) {
     const fakeBid = price + (price * 0.001);
     const fakeAsk = price - (price * 0.001);
 
-    function roundToDecimalPlaces(number, decimalPlaces) {
-      const multiplier = 10 ** decimalPlaces;
-      return Math.round(number * multiplier) / multiplier;
-    }
-
-    const fakeAskInverted = 1 / fakeAsk;
-    const fakeAskInvertedrounded = roundToDecimalPlaces(fakeAskInverted, 18);
-
+    const fakeAskInverted = Math.trunc((1e18 * 1e18) / (1e18 *fakeAsk));
+    
     console.log('Inverted:', fakeAskInverted)
-    console.log('rounded:',fakeAskInvertedrounded )
-
+   
     //Amount limits
     const AmountBuy = 10;
     const AmountSell = 10 * price;
@@ -70,7 +63,7 @@ async function handleRequest(request) {
     const contextSell = [
       ethers.utils.solidityKeccak256(["address", "address"],[USDT_token_address, BTC_token_address]).toString(),
       ethers.utils.parseEther(AmountSell.toString()).toString(),
-      ethers.utils.parseEther(fakeAskInvertedrounded.toString()).toString(),
+      fakeAskInverted,
       BigNumber.from(expiry).toString()
     ]
 
