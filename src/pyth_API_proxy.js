@@ -35,6 +35,9 @@ async function handleRequest(request) {
     //ob contract address
     const ob_address = "0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599";
 
+    //Broker ID 
+    const Broker_ID = 123;
+
     // Eth mainnet Contract addresses for test
     const BTC_token_address = "0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599";
     const USDT_token_address = "0xdAC17F958D2ee523a2206206994597C13D831ec7";
@@ -66,25 +69,27 @@ async function handleRequest(request) {
     if (inputToken === 'USDT' && outputToken === 'BTC') {
       // User wants to swap USDT for BTC (Buy)
       context = [
-        ethers.utils.solidityKeccak256(["address", "address", "address"], [ USDT_token_address, BTC_token_address, ob_addres]).toString(),
+        ethers.utils.solidityKeccak256(["address", "address", "address"], [ USDT_token_address, BTC_token_address, ob_address]).toString(),
+        BigNumber.from(Broker_ID).toString(),
         ethers.utils.parseEther(AmountBuy.toString()).toString(),
         ethers.utils.parseEther(fakeBid.toString()).toString(),
         BigNumber.from(expiry).toString()
       ];
       signature = await signer.signMessage(ethers.utils.arrayify(ethers.utils.solidityKeccak256(
-        ["uint256", "uint256", "uint256", "uint256"],
+        ["uint256", "uint256", "uint256", "uint256", "uint256"],
         context
       )));
     } else if (inputToken === 'BTC' && outputToken === 'USDT') {
       // User wants to swap BTC for USDT (Sell)
       context = [
         ethers.utils.solidityKeccak256(["address", "address", "address"], [BTC_token_address, USDT_token_address, ob_address]).toString(),
+        BigNumber.from(Broker_ID).toString(),
         ethers.utils.parseEther(AmountSell.toString()).toString(),
-        fakeAskInverted,
+        ethers.utils.parseEther(fakeAskInverted.toString()).toString(),
         BigNumber.from(expiry).toString()
       ];
       signature = await signer.signMessage(ethers.utils.arrayify(ethers.utils.solidityKeccak256(
-        ["uint256", "uint256", "uint256", "uint256"],
+        ["uint256", "uint256", "uint256", "uint256", "uint256"],
         context
       )));
     } else {
