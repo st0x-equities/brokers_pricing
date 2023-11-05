@@ -49,8 +49,8 @@ async function handleRequest(request) {
     const fakeAskInverted = Math.trunc((1e18 * 1e18) / (1e18 * fakeAsk));
 
     // Amount limits
-    const AmountBuy = 10;
-    const AmountSell = 10 * price;
+    const AmountBuyLimit = 10;
+    const AmountSellLimit = 10 * price;
 
     // Calculate expiry (current time + 1 minute)
     const now = new Date(); // Get the current date and time
@@ -71,7 +71,7 @@ async function handleRequest(request) {
       context = [
         ethers.utils.solidityKeccak256(["address", "address", "address"], [ USDT_token_address, BTC_token_address, ob_address]).toString(),
         BigNumber.from(Broker_ID).toString(),
-        ethers.utils.parseEther(AmountBuy.toString()).toString(),
+        ethers.utils.parseEther(AmountBuyLimit.toString()).toString(),
         ethers.utils.parseEther(fakeBid.toString()).toString(),
         BigNumber.from(expiry).toString()
       ];
@@ -84,7 +84,7 @@ async function handleRequest(request) {
       context = [
         ethers.utils.solidityKeccak256(["address", "address", "address"], [BTC_token_address, USDT_token_address, ob_address]).toString(),
         BigNumber.from(Broker_ID).toString(),
-        ethers.utils.parseEther(AmountSell.toString()).toString(),
+        ethers.utils.parseEther(AmountSellLimit.toString()).toString(),
         ethers.utils.parseEther(fakeAskInverted.toString()).toString(),
         BigNumber.from(expiry).toString()
       ];

@@ -1,0 +1,71 @@
+/* coupon (signer, signature, [Domain seperator, Broker ID, Amount, IO ratio, expiry])*/
+
+signer: context<2 0>(),
+signature: context<2 1>(),
+domain_seperator: context<3 0>(),
+broker_ID: context<3 1>(),
+AmountLimit: context<3 2>(),
+IO_ratio: context<3 3>(),
+expiry: context<3 4>(),
+
+caller_address: context<1 0>,
+broker_address: context<2 0>,
+
+TSLA_address : 0x,
+USDT_address : 0x,
+
+/* if logic to determine the direction of the trade */
+/* how use domain seperator to verify the coupon is from the same direction the trader is trying to trade? */
+/* Flow only does for one ECR20 eg TSLA, so it always knows TSLA */
+/*it can figure out direction of trade via getting the input token */
+/* how to verify/safeguard the coupon is in the same direction */
+
+Verify input token is same directoin as coupon
+
+/* Once the direction of trade is verified and coupom is correct direction */
+/* use the IO ratio to Calculate the amount for the output */
+/* input token * io ratio = output amount */ 
+/* if input USDT mint TSLA */
+/* if input TSLA burn TSLA */
+
+Amount: /*amount of input token the caller is providing 
+
+
+/**
+ * separator values
+ */
+transferseparator: 0xfea74d0c9bf4a3c28f0dd0674db22a3d7f8bf259c56af19f4ac1e735b156974f,
+mintburnseparator: 0xf339171dab445c29f9897dda2f42413426ee907dc7f8b52bd387bc7cf9384c6b,
+
+/**
+ * erc1155 transfers
+ */
+transfererc1155slist: transferseparator,
+_ _ _ _: from to id amount,
+
+/**
+ * erc721 transfers - this is empty
+ */
+transfererc721slist: transferseparator,
+
+/**
+ * er20 transfers - this is empty
+ */
+transfererc20slist: transferseparator,
+
+/**
+ * native (gas) token transfers
+ */
+transfernativeslist: transferseparator,
+
+/**
+ * burns of this erc20 token
+ */
+burnslist: mintburnseparator,
+_ _ _: from to amount,
+
+/**
+ * mints of this erc20 token
+ */
+mintslist: mintburnseparator,
+_ _: to amount;
