@@ -104,8 +104,8 @@ async function handleRequest(request) {
     // Create the SignedContextV1Struct
     const SignedContextV1Struct = {
       signer: '0x0124555E401547219fB024aE5F8C5101c6f7Cb24', // Replace with your signer's address
-      signature: signature,
-      context: context
+      context: context,
+      signature: signature
     };
 
     // Return the SignedContextV1Struct as JSON

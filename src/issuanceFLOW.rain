@@ -1,35 +1,45 @@
-/* coupon (signer, signature, [Domain seperator, Broker ID, Amount, IO ratio, expiry])*/
+/* coupon (signer, context: [Domain seperator, Broker ID, Amount, IO ratio, expiry], signature)*/
+/* signer context:
+struct SignedContextV1 {
+    // The ordering of these fields is important and used in assembly offset
+    // calculations and hashing.
+    address signer;
+    uint256[] context;
+    bytes signature;
+}*/
 
-signer: context<2 0>(),
-signature: context<2 1>(),
-domain_seperator: context<3 0>(),
-broker_ID: context<3 1>(),
-AmountLimit: context<3 2>(),
-IO_ratio: context<3 3>(),
+/*check the signer is correct */
+required_signer: 0x0124555E401547219fB024aE5F8C5101c6f7Cb24,
+provided_signer: context<2 0>(),
+:ensure(provided_signer required_signer),
+
+/* verify the token input/output by the user is the one provided by the broker */
+coupon_domain_seperator: context<3 0>(),
+caller_tokenaddress_input : context<1 0>(),
+caller_tokenaddress_output : context<1 2>,
+ob_address : 0x,
+
+:ensure(equal-to(coupon_domain_separator hash(caller_tokenaddress_input caller_tokenaddress_output ob_address))),
+
+/* verify the expiry on the coupon has not passed*/
 expiry: context<3 4>(),
+:ensure(less-than(expiry block-timestamp)),
 
-caller_address: context<1 0>,
-broker_address: context<2 0>,
 
-TSLA_address : 0x,
-USDT_address : 0x,
+/* verify user input is not larger than the amount limit */
+couponAmountLimit: context<3 2>(),
+caller_token_input_amount: context<1 1>(),
+volume_record: hash(coupon_domain_seperator expiry),
 
-/* if logic to determine the direction of the trade */
-/* how use domain seperator to verify the coupon is from the same direction the trader is trying to trade? */
-/* Flow only does for one ECR20 eg TSLA, so it always knows TSLA */
-/*it can figure out direction of trade via getting the input token */
-/* how to verify/safeguard the coupon is in the same direction */
+:set(volume_record 0),
+:ensure(volume_record couponAmountLimit),
 
-Verify input token is same directoin as coupon
+/* handles partial fills */
+trade_amount: if(less-than(add(called_token_input_amount volume_record)couponAmountLimit) caller_token_input_amount sub(couponAmountLimit volume_record)),
 
-/* Once the direction of trade is verified and coupom is correct direction */
-/* use the IO ratio to Calculate the amount for the output */
-/* input token * io ratio = output amount */ 
-/* if input USDT mint TSLA */
-/* if input TSLA burn TSLA */
-
-Amount: /*amount of input token the caller is providing 
-
+/* calculate ouput amount */
+IO_ratio: context<3 3>(),
+output_size: mul(trade_amount IO_ratio),
 
 /**
  * separator values
@@ -41,7 +51,6 @@ mintburnseparator: 0xf339171dab445c29f9897dda2f42413426ee907dc7f8b52bd387bc7cf93
  * erc1155 transfers
  */
 transfererc1155slist: transferseparator,
-_ _ _ _: from to id amount,
 
 /**
  * erc721 transfers - this is empty
@@ -52,6 +61,9 @@ transfererc721slist: transferseparator,
  * er20 transfers - this is empty
  */
 transfererc20slist: transferseparator,
+broker_address: 0x,
+caller_address: context<0 0>(),
+_ _ _ _: caller_address broker_address USDT_address trade_amount,
 
 /**
  * native (gas) token transfers
@@ -62,10 +74,11 @@ transfernativeslist: transferseparator,
  * burns of this erc20 token
  */
 burnslist: mintburnseparator,
-_ _ _: from to amount,
+
 
 /**
  * mints of this erc20 token
  */
 mintslist: mintburnseparator,
-_ _: to amount;
+flow_address: context<0 1>(),
+_ _: flow_address caller_address output_size;
