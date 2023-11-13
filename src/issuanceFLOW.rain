@@ -35,11 +35,11 @@ volume_record:get(volume_record_hash),
 
 /* handles partial fills */
 IO_ratio: context<3 3>(),
-asked_output_size: mul(called_token_input_amount IO_ratio),
-trade_amount: if(less-than(add(asked_output_size volume_record)couponAmountLimit) caller_token_input_amount div(sub(couponAmountLimit volume_record) IO_ratio)),
+asked_output_size: div(called_token_input_amount IO_ratio),
+trade_amount: if(less-than(add(asked_output_size volume_record)couponAmountLimit) caller_token_input_amount mul(sub(couponAmountLimit volume_record) IO_ratio)),
 
 /* calculate ouput amount */
-actual_output_size: mul(trade_amount IO_ratio),
+actual_output_size: div(trade_amount IO_ratio),
 
 /* increment volume_record by trade amount */
 set:(volume_record_hash add(volume_record actual_output_size)),
