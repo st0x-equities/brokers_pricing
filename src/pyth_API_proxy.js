@@ -45,9 +45,9 @@ async function handleRequest(request) {
     // Calculate fake bid and ask
     const fakeBid = price + (price * 0.001);
     const fakeAsk = price - (price * 0.001);
-
+    
     const fakeAskInverted = Math.trunc((1e18 * 1e18) / (1e18 * fakeAsk));
-
+ 
     // Amount limits
     const AmountBuyLimit = 10;
     const AmountSellLimit = 10 * price;
@@ -85,7 +85,7 @@ async function handleRequest(request) {
         ethers.utils.solidityKeccak256(["address", "address", "address"], [BTC_token_address, USDT_token_address, ob_address]).toString(),
         BigNumber.from(Broker_ID).toString(),
         ethers.utils.parseEther(AmountSellLimit.toString()).toString(),
-        ethers.utils.parseEther(fakeAskInverted.toString()).toString(),
+        fakeAskInverted.toString(),
         BigNumber.from(expiry).toString()
       ];
       signature = await signer.signMessage(ethers.utils.arrayify(ethers.utils.solidityKeccak256(
